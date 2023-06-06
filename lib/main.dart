@@ -93,9 +93,9 @@ class EmployeeCard extends StatelessWidget {
                   fit: BoxFit.cover,
                   errorBuilder: (BuildContext context, Object error,
                       StackTrace? stackTrace) {
-                    print('An error occurred: $error');
+                    //print('An error occurred: $error');
                     return Image.asset(
-                        "assets/profile_image.png"); // Replace with your error handling widget
+                        "assets/profile_image.png");
                   },
                 ),
               ),
@@ -110,13 +110,11 @@ class EmployeeCard extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.only(right: screenSize.width * 0.05),
-            // Set a different right padding
             child: Divider(
               indent: screenSize.width *
-                  0.05, // Specify the indent or left margin of the divider
-            ), // Add another Divider widget
+                  0.05,
+            ),
           ),
-          // Add another Divider widget
         ],
       ),
     );
