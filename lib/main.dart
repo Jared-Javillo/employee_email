@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 List<EmployeeModel> employeeList = [];
+List<String> teamIdList = <String>['No Filter'];
 
 MaterialColor whiteSwatch = const MaterialColor(0xFFFFFFFF, {
   50: Colors.white,
@@ -39,27 +40,61 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class EmployeeEmailScreen extends StatelessWidget {
-  const EmployeeEmailScreen({super.key, required this.title});
+class EmployeeEmailScreen extends StatefulWidget {
+  const EmployeeEmailScreen({Key? key, required this.title}) : super(key: key);
 
   final String title;
+
+  @override
+  _EmployeeEmailScreenState createState() => _EmployeeEmailScreenState();
+}
+
+class _EmployeeEmailScreenState extends State<EmployeeEmailScreen> {
+  String selectedFilter = '';
+  List<EmployeeModel> filteredEmployees = employeeList;
+  String dropdownValue = teamIdList.first;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
+          title: Text(
+            widget.title,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-      ),
+          actions: [
+            DropdownButton<String>(
+              value: dropdownValue,
+              icon: const Icon(Icons.filter_alt),
+              onChanged: (String? value) {
+                // This is called when the user selects an item.
+                setState(() {
+                  dropdownValue = value!;
+                  selectedFilter = value!;
+                  if(selectedFilter == "No Filter" || selectedFilter == ""){
+                    filteredEmployees = employeeList;
+                  }else {
+                    filteredEmployees =
+                        employeeList.where((employee) => employee.teamId ==
+                            selectedFilter).toList();
+                  }
+                });
+              },
+              items: teamIdList.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+          ],),
       body: Center(
         child: ListView.builder(
-          itemCount: employeeList.length,
+          itemCount: filteredEmployees.length,
           itemBuilder: (BuildContext context, int index) {
-            EmployeeModel employee = employeeList[index];
+            EmployeeModel employee = filteredEmployees[index];
 
             return EmployeeCard(employee);
           },
@@ -71,6 +106,7 @@ class EmployeeEmailScreen extends StatelessWidget {
 
 class EmployeeCard extends StatelessWidget {
   final EmployeeModel employee;
+  final String filterTeamId = "";
 
   const EmployeeCard(this.employee, {super.key});
 
@@ -94,8 +130,7 @@ class EmployeeCard extends StatelessWidget {
                   errorBuilder: (BuildContext context, Object error,
                       StackTrace? stackTrace) {
                     //print('An error occurred: $error');
-                    return Image.asset(
-                        "assets/profile_image.png");
+                    return Image.asset("assets/profile_image.png");
                   },
                 ),
               ),
@@ -111,8 +146,7 @@ class EmployeeCard extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(right: screenSize.width * 0.05),
             child: Divider(
-              indent: screenSize.width *
-                  0.05,
+              indent: screenSize.width * 0.05,
             ),
           ),
         ],
@@ -152,9 +186,10 @@ Future<Widget> fetchImage(String employeeId) async {
 }
 
 class EmployeeModel {
-  final String firstName, lastName, email, employeeId;
+  final String firstName, lastName, email, employeeId, teamId;
 
-  EmployeeModel(this.firstName, this.lastName, this.email, this.employeeId);
+  EmployeeModel(
+      this.firstName, this.lastName, this.email, this.employeeId, this.teamId);
 }
 
 List<EmployeeModel> parseEmployeeList(String jsonData) {
@@ -166,10 +201,14 @@ List<EmployeeModel> parseEmployeeList(String jsonData) {
     String lastName = employeeData['lastname'];
     String email = employeeData['email'];
     String employeeId = employeeData['employee_id'];
+    String teamId = employeeData['team_id'];
 
     EmployeeModel employee =
-        EmployeeModel(firstName, lastName, email, employeeId);
+        EmployeeModel(firstName, lastName, email, employeeId, teamId);
     employeeList.add(employee);
+    if (!teamIdList.contains(employee.teamId)) {
+      teamIdList.add(employee.teamId);
+    }
     //print("${firstName} ${lastName}, ${email}, ${employeeId}");
   }
 
