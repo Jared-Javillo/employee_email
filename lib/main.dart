@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
-List<EmployeeModel> employeeList = [];
-List<String> teamIdList = <String>['No Filter'];
-
 MaterialColor whiteSwatch = const MaterialColor(0xFFFFFFFF, {
   50: Colors.white,
   100: Colors.white,
@@ -20,7 +17,6 @@ MaterialColor whiteSwatch = const MaterialColor(0xFFFFFFFF, {
 });
 
 void main() async {
-  employeeList = parseEmployeeList(await fetchData());
   runApp(const MyApp());
 }
 
@@ -50,46 +46,56 @@ class EmployeeEmailScreen extends StatefulWidget {
 }
 
 class _EmployeeEmailScreenState extends State<EmployeeEmailScreen> {
+  // override init .then
   String selectedFilter = '';
-  List<EmployeeModel> filteredEmployees = employeeList;
-  String dropdownValue = teamIdList.first;
+  List employeeList = <EmployeeModel>[];
+  List<String> teamIdList = ['No Filter'];
+  List filteredEmployees = <EmployeeModel>[];
+  String dropdownValue = "";
+
+  @override
+  void initState() {
+    super.initState();
+    initializeData();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text(
-            widget.title,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
+        title: Text(
+          widget.title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
           ),
-          actions: [
-            DropdownButton<String>(
-              value: dropdownValue,
-              icon: const Icon(Icons.filter_alt),
-              onChanged: (String? value) {
-                // This is called when the user selects an item.
-                setState(() {
-                  dropdownValue = value!;
-                  selectedFilter = value!;
-                  if(selectedFilter == "No Filter" || selectedFilter == ""){
-                    filteredEmployees = employeeList;
-                  }else {
-                    filteredEmployees =
-                        employeeList.where((employee) => employee.teamId ==
-                            selectedFilter).toList();
-                  }
-                });
-              },
-              items: teamIdList.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-            ),
-          ],),
+        ),
+        actions: [
+          DropdownButton<String>(
+            value: dropdownValue,
+            icon: const Icon(Icons.filter_alt),
+            onChanged: (String? value) {
+              // This is called when the user selects an item.
+              setState(() {
+                dropdownValue = value!;
+                selectedFilter = value!;
+                if (selectedFilter == "No Filter" || selectedFilter == "") {
+                  filteredEmployees = employeeList;
+                } else {
+                  filteredEmployees = employeeList
+                      .where((employee) => employee._teamId == selectedFilter)
+                      .toList();
+                }
+              });
+            },
+            items: teamIdList.map<DropdownMenuItem<String>>((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
       body: Center(
         child: ListView.builder(
           itemCount: filteredEmployees.length,
@@ -101,6 +107,43 @@ class _EmployeeEmailScreenState extends State<EmployeeEmailScreen> {
         ),
       ),
     );
+  }
+  Future<void> initializeData() async {
+    dropdownValue = teamIdList.first;
+    employeeList = parseEmployeeList(await fetchData(), teamIdList);
+    filteredEmployees = employeeList;
+  }
+
+  Future<String> fetchData() async {
+    try {
+      final url = Uri.parse(
+          'https://www.app.tarkie.com/API/2.0/get-employees-access-data?api_key=3bCJ7BCm6XBS76677cb156AZH67Py1k49gP3utrbVU30bY8HRd&user_id=13');
+      final response = await http.get(url);
+      // Successful response
+      final data = response.body;
+      // Process the data as needed
+      return data;
+    } catch (e) {
+      // Catch the exception and handle it
+      print('An error occurred: $e');
+      return "";
+    }
+  }
+
+  List<EmployeeModel> parseEmployeeList(
+      String jsonData, List<String> teamIdList) {
+    final parsedData = json.decode(jsonData)['data'];
+    List<EmployeeModel> employeeList = [];
+
+    for (var employeeData in parsedData) {
+      EmployeeModel employee = EmployeeModel.fromJson(employeeData);
+      employeeList.add(employee);
+      if (!teamIdList.contains(employee._teamId)) {
+        teamIdList.add(employee._teamId);
+      }
+      //print("${employee.firstName} ${employee.lastName}, ${employee.email}, ${employee.employeeId}");
+    }
+    return employeeList;
   }
 }
 
@@ -125,7 +168,7 @@ class EmployeeCard extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  'https://sevie.s3.amazonaws.com/sitefiles/employee/${employee.employeeId}.jpg',
+                  'https://sevie.s3.amazonaws.com/sitefiles/employee/${employee._employeeId}.jpg',
                   fit: BoxFit.cover,
                   errorBuilder: (BuildContext context, Object error,
                       StackTrace? stackTrace) {
@@ -136,12 +179,12 @@ class EmployeeCard extends StatelessWidget {
               ),
             ),
             title: Text(
-              "${employee.firstName}, ${employee.lastName}",
+              "${employee._firstName}, ${employee._lastName}",
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
               ),
             ),
-            subtitle: Text(employee.email),
+            subtitle: Text(employee._email),
           ),
           Padding(
             padding: EdgeInsets.only(right: screenSize.width * 0.05),
@@ -155,62 +198,33 @@ class EmployeeCard extends StatelessWidget {
   }
 }
 
-Future<String> fetchData() async {
-  try {
-    final url = Uri.parse(
-        'https://www.app.tarkie.com/API/2.0/get-employees-access-data?api_key=3bCJ7BCm6XBS76677cb156AZH67Py1k49gP3utrbVU30bY8HRd&user_id=13');
-    final response = await http.get(url);
-    // Successful response
-    final data = response.body;
-    // Process the data as needed
-    return data;
-  } catch (e) {
-    // Catch the exception and handle it
-    print('An error occurred: $e');
-    return "";
-  }
-}
-
-Future<Widget> fetchImage(String employeeId) async {
-  try {
-    Widget image = Image.network(
-      'https://sevie.s3.amazonaws.com/sitefiles/employee/${employeeId}.jpg',
-      fit: BoxFit.cover,
-    );
-    return image;
-  } catch (e) {
-    // Catch the exception and handle it
-    print('An error occurred: $e');
-    return Image.asset("assets/profile_image.png");
-  }
-}
-
 class EmployeeModel {
-  final String firstName, lastName, email, employeeId, teamId;
+  final String _firstName;
+  final String _lastName;
+  final String _email;
+  final String _employeeId;
+  final String _teamId;
 
-  EmployeeModel(
-      this.firstName, this.lastName, this.email, this.employeeId, this.teamId);
-}
+  const EmployeeModel({
+    required String firstName,
+    required String lastName,
+    required String email,
+    required String employeeId,
+    required String teamId,
+  })  : _firstName = firstName,
+        _lastName = lastName,
+        _email = email,
+        _employeeId = employeeId,
+        _teamId = teamId;
 
-List<EmployeeModel> parseEmployeeList(String jsonData) {
-  final parsedData = json.decode(jsonData)['data'];
-  List<EmployeeModel> employeeList = [];
-
-  for (var employeeData in parsedData) {
-    String firstName = employeeData['firstname'];
-    String lastName = employeeData['lastname'];
-    String email = employeeData['email'];
-    String employeeId = employeeData['employee_id'];
-    String teamId = employeeData['team_id'];
-
-    EmployeeModel employee =
-        EmployeeModel(firstName, lastName, email, employeeId, teamId);
-    employeeList.add(employee);
-    if (!teamIdList.contains(employee.teamId)) {
-      teamIdList.add(employee.teamId);
-    }
-    //print("${firstName} ${lastName}, ${email}, ${employeeId}");
+  factory EmployeeModel.fromJson(Map<String, dynamic> map) {
+    return EmployeeModel(
+      firstName: map['firstname'],
+      lastName: map['lastname'],
+      email: map['email'],
+      employeeId: map['employee_id'],
+      teamId: map['team_id'],
+    );
   }
-
-  return employeeList;
+//Factory constructor <- handle json parsing
 }
