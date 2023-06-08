@@ -108,6 +108,7 @@ class _EmployeeEmailScreenState extends State<EmployeeEmailScreen> {
       ),
     );
   }
+
   Future<void> initializeData() async {
     dropdownValue = teamIdList.first;
     employeeList = parseEmployeeList(await fetchData(), teamIdList);
