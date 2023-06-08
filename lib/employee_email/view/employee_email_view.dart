@@ -6,6 +6,8 @@ import 'package:employee_email/employee_email/model/employee_model.dart';
 import 'package:employee_email/employee_email/widgets/employee_card.dart';
 import 'dart:convert';
 
+import '../cubit/filter_list_Cubit.dart';
+
 class EmployeeEmailView extends StatefulWidget {
   const EmployeeEmailView({Key? key, required this.title}) : super(key: key);
 
@@ -40,7 +42,7 @@ class _EmployeeEmailViewState extends State<EmployeeEmailView> {
           ),
         ),
         actions: [
-          BlocBuilder<EmployeeEmailCubit, String>(
+          BlocBuilder<FilterListCubit, List<String>>(
             builder: (context, state) {
               return DropdownButton<String>(
                 value: dropdownValue,
@@ -53,7 +55,7 @@ class _EmployeeEmailViewState extends State<EmployeeEmailView> {
                         dropdownValue, employeeList, filteredEmployees);
                   });
                 },
-                items: teamIdList.map<DropdownMenuItem<String>>((String value) {
+                items: state.map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -64,19 +66,19 @@ class _EmployeeEmailViewState extends State<EmployeeEmailView> {
           ),
         ],
       ),
-      body: Center(
-        child: BlocBuilder<EmployeeEmailCubit, String>(
-          builder: (context, state) {
-            return ListView.builder(
-              itemCount: filteredEmployees.length,
+      body: BlocBuilder<EmployeeEmailCubit, List<EmployeeModel>>(
+        builder: (context, state) {
+          return Center(
+            child: ListView.builder(
+              itemCount: state.length,
               itemBuilder: (BuildContext context, int index) {
-                EmployeeModel employee = filteredEmployees[index];
+                EmployeeModel employee = state[index];
 
                 return EmployeeCard(employee);
               },
-            );
-          },
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -90,6 +92,8 @@ class _EmployeeEmailViewState extends State<EmployeeEmailView> {
     if (!context.mounted) return;
     context.read<EmployeeEmailCubit>().changeFilter(
         dropdownValue, employeeList, filteredEmployees);
+    context.read<FilterListCubit>().updateFilterList(teamIdList);
+
   }
 
   Future<String> fetchData() async {

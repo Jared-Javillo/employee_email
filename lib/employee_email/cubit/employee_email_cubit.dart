@@ -4,9 +4,9 @@ import 'package:employee_email/employee_email/model/employee_model.dart';
 /// {@template counter_cubit}
 /// A [Cubit] which manages an [String] as its state.
 /// {@endtemplate}
-class EmployeeEmailCubit extends Cubit<String> {
-  /// {@macro employee_email_cubit}
-  EmployeeEmailCubit() : super("No Filter");
+class EmployeeEmailCubit extends Cubit<List<EmployeeModel>>{
+  /// {@macro counter_cubit}
+  EmployeeEmailCubit() : super([]);
 
   void changeFilter(String filter,List<EmployeeModel> employeeList, List<EmployeeModel> filteredEmployees) {
     if (filter == "No Filter" || filter == "") {
@@ -16,6 +16,6 @@ class EmployeeEmailCubit extends Cubit<String> {
           .where((employee) => employee.teamId == filter)
           .toList();
     }
-    emit(filter);
+    emit(filteredEmployees);
   }
 }
