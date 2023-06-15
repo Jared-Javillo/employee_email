@@ -3,7 +3,8 @@ import 'package:codepan/data/database/schema.dart';
 import 'package:employee_email/data/database/db_config.dart' as config;
 
 enum Tb implements DatabaseEntity {
-  employees;
+  employees,
+  teams;
 
   @override
   String get dbName => config.dbName;
@@ -32,11 +33,22 @@ class Schema extends DatabaseSchema<Tb> {
           Field.autoUpdateDate('dateUpdated'),
           Field.autoUpdateTime('timeUpdated'),
           Field.defaultValue('isDeleted', value: false),
-          Field.unique('employeeId', type: DataType.integer),
+          Field.unique('webId', type: DataType.integer),
           Field.column('lastName', type: DataType.text),
           Field.column('firstName', type: DataType.text),
           Field.column('email', type: DataType.text),
-          Field.column('teamId', type: DataType.integer),
+          Field.foreignKey('teamId', at: at(Tb.teams)).ug(),
+        ];
+      case Tb.teams:
+        return <Field>[
+          Field.primaryKey('id'),
+          Field.defaultDate('dateCreated'),
+          Field.defaultTime('timeCreated'),
+          Field.autoUpdateDate('dateUpdated'),
+          Field.autoUpdateTime('timeUpdated'),
+          Field.defaultValue('isDeleted', value: false),
+          Field.unique('webId', type: DataType.integer),
+          Field.column('name', type: DataType.text),
         ];
       default:
         return <Field>[

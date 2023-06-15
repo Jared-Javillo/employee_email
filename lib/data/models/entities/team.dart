@@ -1,23 +1,19 @@
 import 'package:codepan/data/database/schema.dart';
-import 'package:codepan/data/database/sqlite_adapter.dart';
-import 'package:codepan/data/database/sqlite_query.dart';
 import 'package:codepan/data/models/entities/master.dart';
 import 'package:codepan/extensions/map.dart';
 import 'package:codepan/time/time.dart';
 import 'package:employee_email/data/database/db_config.dart';
 import 'package:employee_email/data/database/schema.dart';
-import 'package:employee_email/data/models/entities/team.dart';
 
-const _schema = TableSchema(schema, Tb.employees);
+const _schema = TableSchema(schema, Tb.teams);
 
-class EmployeeData extends MasterData {
-  final String? firstName, lastName, email, teamId;
-  TeamData? team;
+class TeamData extends MasterData {
+
 
   @override
   TableSchema get schemaInstance => _schema;
 
-  EmployeeData({
+  const TeamData({
     super.id,
     super.dateCreated,
     super.timeCreated,
@@ -25,41 +21,27 @@ class EmployeeData extends MasterData {
     super.timeUpdated,
     super.isDeleted,
     super.webId,
-    this.teamId,
-    this.firstName,
-    this.lastName,
-    this.email,
-    this.team,
+    super.name,
   });
 
-  factory EmployeeData.fromJson(
-    Map<String, dynamic> json,
-  {TeamData? team}
-  ) {
+  factory TeamData.fromJson(Map<String, dynamic> json) {
     final createdAt = Time.today();
     final updatedAt = Time.today();
-    return EmployeeData(
+    return TeamData(
       dateCreated: createdAt.date,
       timeCreated: createdAt.time,
       dateUpdated: updatedAt.date,
       timeUpdated: updatedAt.time,
-      webId: int.parse(json['employee_id']),
-      lastName: json['lastname'],
-      firstName: json['firstname'],
-      email: json['email'],
-      teamId: json['team_id'],
-      team: team,
+      webId: json.getInt('team_id'),
+      name: json.get('team_name'),
     );
   }
 
-  static EmployeeData? fromQuery(
-    Map<String, dynamic>? record, {
-    TeamData? team,
-  }) {
+  static TeamData? fromQuery(Map<String, dynamic>? record) {
     final map = record?.copy();
     map?.setPrefix(_schema.alias);
     if (map?.hasKeyWithValue('id') ?? false) {
-      return EmployeeData(
+      return TeamData(
         id: map!.get('id'),
         dateCreated: map.get('dateCreated'),
         timeCreated: map.get('timeCreated'),
@@ -67,18 +49,14 @@ class EmployeeData extends MasterData {
         timeUpdated: map.get('timeUpdated'),
         isDeleted: map.get('isDeleted'),
         webId: map.get('webId'),
-        lastName: map.get('lastName').toString(),
-        firstName: map.get('firstName').toString(),
-        email: map.get('email').toString(),
-        teamId: map.get('teamId').toString(),
-        team: team ?? TeamData.fromQuery(record),
+        name: map.get('name').toString(),
       );
     }
     return null;
   }
 
   @override
-  EmployeeData copyWith({
+  TeamData copyWith({
     int? id,
     String? dateCreated,
     String? timeCreated,
@@ -86,13 +64,10 @@ class EmployeeData extends MasterData {
     String? timeUpdated,
     bool? isDeleted,
     int? webId,
-    String? lastName,
-    String? firstName,
-    String? email,
-    String? teamId,
-    TeamData? team,
+    String? name,
+
   }) {
-    return EmployeeData(
+    return TeamData(
       id: id ?? this.id,
       dateCreated: dateCreated ?? this.dateCreated,
       timeCreated: timeCreated ?? this.timeCreated,
@@ -100,17 +75,14 @@ class EmployeeData extends MasterData {
       timeUpdated: timeUpdated ?? this.timeUpdated,
       isDeleted: isDeleted ?? this.isDeleted,
       webId: webId ?? this.webId,
-      lastName: lastName ?? this.lastName,
-      firstName: firstName ?? this.firstName,
-      email: email ?? this.email,
-      team: team ?? this.team,
+      name: name ?? this.name,
     );
   }
 
   @override
   Map<String, dynamic> toMap() {
     return filtered({
-      'teamId':team?.id,
-    });
+    })
+      ..remove([]);
   }
 }
