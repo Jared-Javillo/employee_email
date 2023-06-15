@@ -108,18 +108,18 @@ class EmployeeCard extends StatelessWidget {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
                 child: Image.network(
-                  'https://sevie.s3.amazonaws.com/sitefiles/employee/${employee.employeeId}.jpg',
+                  'https://sevie.s3.amazonaws.com/sitefiles/employee/${employee.webId.toString()}.jpg',
                   fit: BoxFit.cover,
                   errorBuilder: (BuildContext context, Object error,
                       StackTrace? stackTrace) {
-                    //print('An error occurred: $error');
+                    print('https://sevie.s3.amazonaws.com/sitefiles/employee/${employee.webId.toString()}.jpg');
                     return Image.asset("assets/profile_image.png");
                   },
                 ),
               ),
             ),
             title: Text(
-              "${employee.firstName}, ${employee.lastName}",
+              "${employee.firstName}, ${employee.lastName} [${employee.team?.name}]",
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
               ),

@@ -39,7 +39,7 @@ class AppBloc extends ParentBloc<AppEvent, AppState> {
         debugPrint(db.path);
         await _dbTesting(db);
         await Future.delayed(const Duration(seconds: 1));
-        await Rx.getEmployees(db: db, client: client,);
+        Rx.getEmployees(db: db, client: client,);
         emit(
           Database(db: db),
         );

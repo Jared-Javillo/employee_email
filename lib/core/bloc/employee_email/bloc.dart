@@ -55,3 +55,4 @@ Future<SqliteAdapter> getDatabase() async {
     ),
   );
 }
+
