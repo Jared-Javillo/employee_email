@@ -12,12 +12,12 @@ const _schema = TableSchema(schema, Tb.employees);
 
 class EmployeeData extends MasterData {
   final String? firstName, lastName, email, teamId;
-  TeamData? team;
+  final TeamData? team;
 
   @override
   TableSchema get schemaInstance => _schema;
 
-  EmployeeData({
+  const EmployeeData({
     super.id,
     super.dateCreated,
     super.timeCreated,
@@ -33,9 +33,9 @@ class EmployeeData extends MasterData {
   });
 
   factory EmployeeData.fromJson(
-    Map<String, dynamic> json,
-  {TeamData? team}
-  ) {
+    Map<String, dynamic> json, {
+    required TeamData team,
+  }) {
     final createdAt = Time.today();
     final updatedAt = Time.today();
     return EmployeeData(
@@ -110,7 +110,7 @@ class EmployeeData extends MasterData {
   @override
   Map<String, dynamic> toMap() {
     return filtered({
-      'teamId':team?.id,
+      'teamId': team?.id,
     });
   }
 }

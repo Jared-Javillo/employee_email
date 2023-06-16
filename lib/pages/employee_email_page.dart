@@ -119,7 +119,7 @@ class EmployeeCard extends StatelessWidget {
               ),
             ),
             title: Text(
-              "${employee.firstName}, ${employee.lastName} [${employee.team?.name}]",
+              "${employee.firstName}, ${employee.lastName} [${employee.team!.name}]",
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
               ),

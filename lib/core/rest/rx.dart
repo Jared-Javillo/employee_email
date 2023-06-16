@@ -32,14 +32,16 @@ class Rx {
         return await binder.transact<bool>(
           body: (binder) async {
             List<TeamData> teams = [];
-            final bool isGetTeamSuccessful = await getTeams(db: db, client: client, teams: teams);
+            const emptyTeam = TeamData();
+            final bool isGetTeamSuccessful =
+                await getTeams(db: db, client: client, teams: teams);
             if (data.isNotEmpty && isGetTeamSuccessful) {
               print("DB: Inserting to Database");
               for (Map<String, dynamic> json in data) {
-                EmployeeData e = EmployeeData.fromJson(json);
-                e.team = assignTeamData(e, teams);
+                EmployeeData e = EmployeeData.fromJson(json, team: emptyTeam);
+                e.copyWith(team: assignTeamData(e, teams));
                 print("DB: ${e.lastName}");
-                print("DB: ${e.team?.name}");
+                print("DB: ${e.team!.webId}");
                 final employee = await e.insertForId<EmployeeData>(binder);
                 binder.updateData(
                   data: e,
@@ -112,10 +114,10 @@ Future<String> fetchEmployeeData() async {
   }
 }
 
-TeamData? assignTeamData(EmployeeData employee, List<TeamData> teams)  {
+TeamData? assignTeamData(EmployeeData employee, List<TeamData> teams) {
   try {
-    for(TeamData team in teams){
-      if(int.parse(employee.teamId!) == team.webId){
+    for (TeamData team in teams) {
+      if (int.parse(employee.teamId!) == team.webId) {
         return team;
       }
     }
@@ -124,4 +126,3 @@ TeamData? assignTeamData(EmployeeData employee, List<TeamData> teams)  {
   }
   return null;
 }
-
