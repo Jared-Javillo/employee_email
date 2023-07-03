@@ -37,7 +37,7 @@ class Schema extends DatabaseSchema<Tb> {
           Field.column('lastName', type: DataType.text),
           Field.column('firstName', type: DataType.text),
           Field.column('email', type: DataType.text),
-          Field.foreignKey('teamId', at: at(Tb.teams)).ug(),
+          Field.foreignKey('teamId', at: at(Tb.teams)),
         ];
       case Tb.teams:
         return <Field>[

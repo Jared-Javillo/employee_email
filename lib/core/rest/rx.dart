@@ -39,12 +39,13 @@ class Rx {
               print("DB: Inserting to Database");
               for (Map<String, dynamic> json in data) {
                 EmployeeData e = EmployeeData.fromJson(json, team: emptyTeam);
-                e.copyWith(team: assignTeamData(e, teams));
-                print("DB: ${e.lastName}");
-                print("DB: ${e.team!.webId}");
+                e = e.copyWith(team: assignTeamData(e, teams));
+                print("DB: Inserting");
                 final employee = await e.insertForId<EmployeeData>(binder);
+                print("DB: ${employee.firstName} ${employee.lastName}");
+                print("DB: ${employee.team!.webId}");
                 binder.updateData(
-                  data: e,
+                  data: employee,
                 );
               }
             }
@@ -79,12 +80,12 @@ class Rx {
             if (data.isNotEmpty) {
               print("DB: Inserting to Database");
               for (Map<String, dynamic> json in data) {
-                final e = TeamData.fromJson(json);
-                print("DB: ${e.name}");
-                final team = await e.insertForId<TeamData>(binder);
+                final t = TeamData.fromJson(json);
+                print("DB: ${t.name}");
+                final team = await t.insertForId<TeamData>(binder);
                 teams.add(team);
                 binder.updateData(
-                  data: e,
+                  data: t,
                 );
               }
             }

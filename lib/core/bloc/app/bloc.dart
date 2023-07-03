@@ -39,10 +39,15 @@ class AppBloc extends ParentBloc<AppEvent, AppState> {
         debugPrint(db.path);
         await _dbTesting(db);
         await Future.delayed(const Duration(seconds: 1));
-        Rx.getEmployees(db: db, client: client,);
-        emit(
-          Database(db: db),
-        );
+        if (Rx.getEmployees(db: db, client: client,) == true){
+          print("DB getEmployees complete... Now Emitting");
+          emit(
+            Database(db: db),
+          );
+        }
+        else {
+          print("Database insert error");
+        }
       } catch (error, stackTrace) {
         printError(error, stackTrace);
         emit(

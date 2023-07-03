@@ -14,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:codepan/widgets/page_builder.dart';
 import 'package:codepan/data/database/sqlite_adapter.dart';
 import 'package:codepan/data/database/sqlite_cache.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import 'mixins/error_properties.dart';
 
@@ -107,14 +108,11 @@ class EmployeeCard extends StatelessWidget {
               height: screenSize.width * 0.15,
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(8),
-                child: Image.network(
-                  'https://sevie.s3.amazonaws.com/sitefiles/employee/${employee.webId.toString()}.jpg',
-                  fit: BoxFit.cover,
-                  errorBuilder: (BuildContext context, Object error,
-                      StackTrace? stackTrace) {
-                    print('https://sevie.s3.amazonaws.com/sitefiles/employee/${employee.webId.toString()}.jpg');
-                    return Image.asset("assets/profile_image.png");
-                  },
+                child:
+                CachedNetworkImage(
+                  imageUrl: 'https://sevie.s3.amazonaws.com/sitefiles/employee/${employee.webId.toString()}.jpg',
+                  placeholder: (context, url) => const CircularProgressIndicator(),
+                  errorWidget: (context, url, error) => Image.asset("assets/profile_image.png"),
                 ),
               ),
             ),

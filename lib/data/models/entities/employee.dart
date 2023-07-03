@@ -111,6 +111,10 @@ class EmployeeData extends MasterData {
   Map<String, dynamic> toMap() {
     return filtered({
       'teamId': team?.id,
+      'firstName': firstName,
+      'lastName': lastName,
+      'email': email,
     });
   }
+
 }
